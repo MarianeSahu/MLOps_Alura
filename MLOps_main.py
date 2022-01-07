@@ -9,7 +9,6 @@ import os
 from flask import Flask, request, jsonify
 from flask_basicauth import BasicAuth # autenticacao
 from textblob import TextBlob
-from sklearn.linear_model import LinearRegression
 import pickle
 
 # instancia o api
@@ -20,17 +19,22 @@ basic_auth = BasicAuth(app)
 
 # modelo de preco das casas: so executa uma vez assim que a instancia subir
 # region
-path = 'G:/.shortcut-targets-by-id/120EU9gkG9oO1ilsmtz23VjxiJA4I7ehL/Alura/'
-modelo = pickle.load(
-    open(path + 'Formação ML e Negócios Digitais/' +  'modelo_preco_casas.sav', 'rb')
-)
+# rodando local
+#path = 'G:/.shortcut-targets-by-id/120EU9gkG9oO1ilsmtz23VjxiJA4I7ehL/Alura/'
+#modelo = pickle.load(
+#    open(path + 'Formação ML e Negócios Digitais/MLOps_Alura/' +  'modelo_preco_casas.sav', 'rb')
+#)
+
+# rodando no docker
+modelo = pickle.load(open('modelo_preco_casas.sav', 'rb'))
 # endregion
 
 # paginas
 # region
 @app.route('/')
 def home():
-    return 'Primeira API para ML'
+    #return 'Primeira API para ML'
+    return 'BASIC_AUTH_USERNAME: ' + str(os.environ.get('BASIC_AUTH_USERNAME')) + ' - BASIC_AUTH_PASSWORD:' + str(os.environ.get('BASIC_AUTH_PASSWORD'))
 
 @app.route('/sentimento/<frase>')
 @basic_auth.required # exigir autenticacao
@@ -50,5 +54,7 @@ def cotacao():
 # endregion
 
 # executando a api - restart com as novas alteracoes salvas
-app.run(debug=True, host='0.0.0.0')
+# se a porta ja esta aberta, nao executar novamente
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0')
 
